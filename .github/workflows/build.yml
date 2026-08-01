@@ -27,7 +27,17 @@ jobs:
               fi
             fi
           fi
-          ls -la build.gradle 2>/dev/null || echo "build.gradle not found"
+
+      - name: Fix Dependencies
+        run: |
+          if [ -f "app/build.gradle" ]; then
+            # أضف activity-ktx إذا ما كانت موجودة
+            if ! grep -q "activity-ktx" app/build.gradle; then
+              sed -i "/androidx.core:core-ktx/a\    implementation 'androidx.activity:activity-ktx:1.8.2'" app/build.gradle
+            fi
+            # استبدل الـ Xray dependency الخاطئة
+            sed -i "s|com\.github\.2dust:AndroidLibXrayLite[^']*|files('libs/libv2ray.aar')|g" app/build.gradle
+          fi
 
       - name: Setup Properties
         run: |
